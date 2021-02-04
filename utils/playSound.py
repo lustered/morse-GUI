@@ -64,6 +64,9 @@ class PlaySound:
 
                 return
 
+            if len(self.code) < 1:
+                return 
+
             mixer.music.load(self.codeSounds.get(self.code.pop()))
 
             for _ in range(len(self.code)):

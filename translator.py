@@ -39,6 +39,7 @@ class MorseTranslator(Frame):
         self.windowSettings(master)
         self.mainMenu()
         self.player = PlaySound()
+        self.playingid = None
         self.pack()
 
     def windowSettings(self, master):
@@ -149,12 +150,14 @@ class MorseTranslator(Frame):
 
     def _play(self):
         ''' Play the content of box #2 '''
+        if self.playingid is not None:
+            self.after_cancel(self.playingid)
 
         _text2 = self.box2.get("1.0", "end").strip("\n")
         self.player.setCode(_text2)
         self.player.play()
         self.playing.grid(row=3, column=1, ipadx = 10, padx=5, pady=5, sticky="WENS", columnspan=2)
-        self.after(3000, self.playing.grid_forget)
+        self.playingid = self.after(3000, self.playing.grid_forget)
 
     def _swap(self):
         """ Swap the content of the text boxes """

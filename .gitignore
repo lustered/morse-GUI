@@ -1,3 +1,4 @@
 .vim
 __pycache__
 utils/__pycache__
+audio/tts.mp3

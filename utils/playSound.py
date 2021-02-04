@@ -50,6 +50,7 @@ class PlaySound:
         """ Play the morse code sounds in the storaged string """
 
         mixer.stop()
+        self.restart_mixer()
 
         def _threadedPlay(self):
             """ Plays TTS or morse code """
@@ -65,15 +66,16 @@ class PlaySound:
 
             mixer.music.load(self.codeSounds.get(self.code.pop()))
 
-            for i in self.code:
+            for _ in range(len(self.code)):
                 try:
-                    mixer.music.queue(self.codeSounds.get(i))
-                    mixer.music.play()
+                    mixer.music.queue(self.codeSounds.get(self.code.pop()))
 
                 except:  # pygame.error
                     sleep(1)
 
-                sleep(0.4)
+                mixer.music.play()
+
+                sleep(0.3)
 
         isPlaying = Thread(target=lambda: _threadedPlay(self))
 

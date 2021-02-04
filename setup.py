@@ -1,6 +1,6 @@
 import pip
 
-pip_packages = ["tk", "cx_freeze"]
+pip_packages = ["tk", "cx_freeze", "gTTS"]
 pip.main(["install", *pip_packages])
 
 import cx_Freeze
@@ -35,7 +35,7 @@ options = {
     "packages": ["tkinter"],
     "includes": [],
     "excludes": [],
-    "include_files": ["translator.py", 'icon.png'],
+    "include_files": ["translator.py", 'icon.png', 'utils/', 'audio/'],
 }
 
 executables = [cx_Freeze.Executable("app.py", base=None, icon=r"icon.svg")]

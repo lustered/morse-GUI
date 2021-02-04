@@ -1,6 +1,7 @@
-from tkinter import Tk, Frame, Text
+from tkinter import Tk, Frame, Text, Label
 from tkinter import ttk
 import re
+from utils.playSound import PlaySound
 
 # Base cases for English-to-Morse and Morse-to-English
 E2M = { 'A': '.-',     'B': '-...',   'C': '-.-.', 
@@ -22,12 +23,12 @@ E2M = { 'A': '.-',     'B': '-...',   'C': '-.-.',
 M2E = {value: key for key, value in E2M.items()}
 
 # Helper functions
-def to_morse(s):
-    return " ".join(E2M.get(i.upper()) for i in s)
+def to_morse(string) -> str:
+    return " ".join(E2M.get(i.upper()) for i in string)
 
 
-def from_morse(s):
-    return "".join(M2E.get(i) for i in s.split())
+def from_morse(string) -> str:
+    return "".join(M2E.get(i) for i in string.split())
 
 
 class MorseTranslator(Frame):
@@ -37,11 +38,12 @@ class MorseTranslator(Frame):
         super().__init__(master)
         self.windowSettings(master)
         self.mainMenu()
+        self.player = PlaySound()
         self.pack()
 
     def windowSettings(self, master):
         """ Set the main window settings """
-        self.master.geometry("930x250")
+        self.master.geometry("930x230")
         self.master.title("Morse Code Translator")
         self.master.configure(bg="#2b2b2b")
 
@@ -52,9 +54,8 @@ class MorseTranslator(Frame):
             highlightthickness=5,
         )
 
+        self.pack_propagate(False)
         self.master.resizable(False, False)
-        self.master.grid_propagate(False)
-        self.master.pack_propagate(False)
 
     def mainMenu(self):
         """ Create and grid the main frame widgets """
@@ -80,6 +81,13 @@ class MorseTranslator(Frame):
         translate = ttk.Button(self, text="Translate", command=self._translate)
 
         swap = ttk.Button(self, text="Swap", command=self._swap)
+
+        play = ttk.Button(self, text="Play", command= self._play)
+
+        # highlightthickness=2, highlightbackground='red')
+        self.error = Label(self, text='Please sanitize the text',bg='#deaf9d',fg='#2b2b2b')
+
+        self.playing = Label(self, text='Playing the morse code in box #2',bg='#deaf9d',fg='#2b2b2b')
         # ---------------------------------------------------------------------
 
         #                           Text boxes
@@ -115,6 +123,7 @@ class MorseTranslator(Frame):
             insertbackground="#deaf9d",
             selectbackground="#deaf9d",
         )
+
         # ---------------------------------------------------------------------
 
         #                   Place the widgets in the grid
@@ -124,6 +133,8 @@ class MorseTranslator(Frame):
 
         translate.grid(row=1, column=1, ipadx=10, padx=5)
         swap.grid(row=1, column=2, ipadx=10, padx=5)
+        play.grid(row=2, column=3, ipadx=10, padx=5)
+
         # --------------------------------------------------------------------
 
         #                   Widget bindings
@@ -135,6 +146,15 @@ class MorseTranslator(Frame):
         self.box1.bind("<Delete>", lambda x: self.box1.delete('1.0', 'end'))
         self.box2.bind("<Delete>", lambda x: self.box2.delete('1.0', 'end'))
 
+
+    def _play(self):
+        ''' Play the content of box #2 '''
+
+        _text2 = self.box2.get("1.0", "end").strip("\n")
+        self.player.setCode(_text2)
+        self.player.play()
+        self.playing.grid(row=3, column=1, ipadx = 10, padx=5, pady=5, sticky="WENS", columnspan=2)
+        self.after(3000, self.playing.grid_forget)
 
     def _swap(self):
         """ Swap the content of the text boxes """
@@ -151,6 +171,7 @@ class MorseTranslator(Frame):
     def _translate(self):
         """ Translate the contents of the left box(box1) to the opposite language """
 
+        self.error.grid_forget()
         # Remove new lines, replaces new line characters to make them behave like spaces
         # .strip() will only remove the new lines at the end/beginning of a string 
         # but not the ones in between.
@@ -171,5 +192,8 @@ class MorseTranslator(Frame):
             self.box2.insert("1.0", translation)
             
         except:
+            # Console output
             print("We're sorry. The text you entered could not be processed.")
 
+            # Display error message
+            self.error.grid(row=2, column=1, ipadx = 10, padx=5, sticky="WENS", columnspan=2)

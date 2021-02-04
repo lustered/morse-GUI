@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python3.6
 from translator import MorseTranslator, Tk
 from tkinter import Image
 

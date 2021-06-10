@@ -3,38 +3,24 @@ from tkinter import ttk
 import re
 from utils.playSound import PlaySound
 
-# Base cases for English-to-Morse and Morse-to-English
-E2M = { 'A': '.-',     'B': '-...',   'C': '-.-.', 
-        'D': '-..',    'E': '.',      'F': '..-.',
-        'G': '--.',    'H': '....',   'I': '..',
-        'J': '.---',   'K': '-.-',    'L': '.-..',
-        'M': '--',     'N': '-.',     'O': '---',
-        'P': '.--.',   'Q': '--.-',   'R': '.-.',
-        'S': '...',    'T': '-',      'U': '..-',
-        'V': '...-',   'W': '.--',    'X': '-..-',
-        'Y': '-.--',   'Z': '--..',
-
-        '0': '-----',  '1': '.----',  '2': '..---',
-        '3': '...--',  '4': '....-',  '5': '.....',
-        '6': '-....',  '7': '--...',  '8': '---..',
-        '9': '----.',  ' ': '/'
-        }
-
-M2E = {value: key for key, value in E2M.items()}
-
-# Helper functions
-def to_morse(string) -> str:
-    return " ".join(E2M.get(i.upper()) for i in string)
-
-
-def from_morse(string) -> str:
-    return "".join(M2E.get(i) for i in string.split())
-
 
 class MorseTranslator(Frame):
     """ Morse code translator class """
 
+    # Base cases for English-to-Morse and Morse-to-English
+    E2M = { "A": ".-", "B": "-...", "C": "-.-.", "D": "-..", "E": ".",
+        "F": "..-.", "G": "--.", "H": "....", "I": "..", "J": ".---",
+        "K": "-.-", "L": ".-..", "M": "--", "N": "-.", "O": "---", "P": ".--.",
+        "Q": "--.-", "R": ".-.", "S": "...", "T": "-", "U": "..-", "V": "...-",
+        "W": ".--", "X": "-..-", "Y": "-.--", "Z": "--..", "0": "-----",
+        "1": ".----", "2": "..---", "3": "...--", "4": "....-", "5": ".....",
+        "6": "-....", "7": "--...", "8": "---..", "9": "----.", " ": "/",
+    }
+
+    M2E = {value: key for key, value in E2M.items()}
+
     def __init__(self, master):
+        """ Initialize properties """
         super().__init__(master)
         self.windowSettings(master)
         self.mainMenu()
@@ -83,12 +69,16 @@ class MorseTranslator(Frame):
 
         swap = ttk.Button(self, text="Swap", command=self._swap)
 
-        play = ttk.Button(self, text="Play", command= self._play)
+        play = ttk.Button(self, text="Play", command=self._play)
 
         # highlightthickness=2, highlightbackground='red')
-        self.error = Label(self, text='Please sanitize the text',bg='#deaf9d',fg='#2b2b2b')
+        self.error = Label(
+            self, text="Please sanitize the text", bg="#deaf9d", fg="#2b2b2b"
+        )
 
-        self.playing = Label(self, text='Playing the morse code in box #2',bg='#deaf9d',fg='#2b2b2b')
+        self.playing = Label(
+            self, text="Playing the morse code in box #2", bg="#deaf9d", fg="#2b2b2b"
+        )
         # ---------------------------------------------------------------------
 
         #                           Text boxes
@@ -144,19 +134,20 @@ class MorseTranslator(Frame):
         self.box1.bind("<Return>", lambda x: self._translate())
 
         #                   Empty the text box on Delete
-        self.box1.bind("<Delete>", lambda x: self.box1.delete('1.0', 'end'))
-        self.box2.bind("<Delete>", lambda x: self.box2.delete('1.0', 'end'))
-
+        self.box1.bind("<Delete>", lambda x: self.box1.delete("1.0", "end"))
+        self.box2.bind("<Delete>", lambda x: self.box2.delete("1.0", "end"))
 
     def _play(self):
-        ''' Play the content of box #2 '''
+        """ Play the content of box #2 """
         if self.playingid is not None:
             self.after_cancel(self.playingid)
 
         _text2 = self.box2.get("1.0", "end").strip("\n")
         self.player.setCode(_text2)
         self.player.play()
-        self.playing.grid(row=3, column=1, ipadx = 10, padx=5, pady=5, sticky="WENS", columnspan=2)
+        self.playing.grid(
+            row=3, column=1, ipadx=10, padx=5, pady=5, sticky="WENS", columnspan=2
+        )
         self.playingid = self.after(3000, self.playing.grid_forget)
 
     def _swap(self):
@@ -176,9 +167,9 @@ class MorseTranslator(Frame):
 
         self.error.grid_forget()
         # Remove new lines, replaces new line characters to make them behave like spaces
-        # .strip() will only remove the new lines at the end/beginning of a string 
+        # .strip() will only remove the new lines at the end/beginning of a string
         # but not the ones in between.
-        _text1 = self.box1.get("1.0", "end").strip("\n").replace('\n', ' ')
+        _text1 = self.box1.get("1.0", "end").strip("\n").replace("\n", " ")
 
         # print(repr(_text1))
 
@@ -188,15 +179,27 @@ class MorseTranslator(Frame):
         # _text1 = _text1.replace(" ", "") if re.search("[a-zA-Z]+", _text1) else _text1
 
         try:
-            translation =  to_morse(_text1) if re.search("[a-zA-Z]+", _text1) \
-                else from_morse(_text1)
+            translation = (
+                self.to_morse(_text1)
+                if re.search("[a-zA-Z]+", _text1)
+                else self.from_morse(_text1)
+            )
 
             self.box2.delete("1.0", "end")
             self.box2.insert("1.0", translation)
-            
+
         except:
             # Console output
             print("We're sorry. The text you entered could not be processed.")
 
             # Display error message
-            self.error.grid(row=2, column=1, ipadx = 10, padx=5, sticky="WENS", columnspan=2)
+            self.error.grid(
+                row=2, column=1, ipadx=10, padx=5, sticky="WENS", columnspan=2
+            )
+
+    # Helper functions
+    def to_morse(self, englishstr) -> str:
+        return " ".join(self.E2M.get(i.upper()) for i in englishstr)
+
+    def from_morse(self, morsestr) -> str:
+        return "".join(self.M2E.get(i) for i in morsestr.split())
